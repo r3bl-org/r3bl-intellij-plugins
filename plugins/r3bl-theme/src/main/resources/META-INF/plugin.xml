@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<idea-plugin>
+    <id>com.r3bl.r3bl-theme</id>
+    <name>R3BL Theme</name>
+    <vendor email="info@r3bl.com" url="https://r3bl.com">R3BL</vendor>
+    <description>A vibrant dark theme for IntelliJ IDEA with carefully chosen colors for visual clarity and reduced eye strain.</description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <themeProvider id="d0aa5a91-2e38-4959-b3a8-1c42798acb8e" path="/theme/r3bl.theme.json"/>
+    </extensions>
+</idea-plugin>

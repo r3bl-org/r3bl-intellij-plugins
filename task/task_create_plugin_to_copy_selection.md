@@ -19,40 +19,30 @@ The plugin produces strings in three different formats depending on the selectio
 
 1. **Range of lines** (multi-line selection):
    ```
-   tui/src/readline_async/readline_async_impl/integration_tests/pty_ctrl_navigation_test.rs#L331-335
+   @tui/src/readline_async/readline_async_impl/integration_tests/pty_ctrl_navigation_test.rs#L331-335
    ```
-   - Format: `<relativePath>#L<startLine>-<endLine>`
+   - Format: `@<relativePath>#L<startLine>-<endLine>`
    - Claude Code specific format (allows range selection)
    - NOT compatible with IDE navigation (can't jump to line ranges)
 
-2. **Single line** (single-line selection):
+2. **Single line** (single-line selection OR no selection):
    ```
    tui/src/readline_async/readline_async_impl/integration_tests/pty_ctrl_navigation_test.rs:331
    ```
    - Format: `<relativePath>:<lineNumber>`
    - Compatible with VSCode, RustRover, IntelliJ, AND Claude Code
-   - Used when text is selected on a single line
-
-3. **No selection** (cursor only, no text selected):
-   ```
-   tui/src/readline_async/readline_async_impl/integration_tests/pty_ctrl_navigation_test.rs
-   ```
-   - Format: `<relativePath>`
-   - Compatible everywhere
-   - Used when cursor is in file but no text selected
+   - Used when text is selected on a single line OR when cursor is at a line without selection
 
 ### Line Range Behavior
 
-1. **Multi-line selection**: Format as `#L<startLine>-<endLine>` (e.g., `#L165-169`)
+1. **Multi-line selection**: Format as `@<path>#L<startLine>-<endLine>` (e.g., `@path/to/file.kt#L165-169`)
    - Claude Code specific format
    - Allows Claude to select and view a range of lines
-2. **Single-line selection**: Format as `:<lineNumber>` (e.g., `:165`)
+2. **Single-line selection OR no selection**: Format as `<path>:<lineNumber>` (e.g., `path/to/file.kt:165`)
    - IDE-compatible format that works everywhere
-   - Only when there's an actual text selection on that line
-3. **No selection (cursor only)**: Just the file path with no line number
-   - IDE-compatible format that works everywhere
-   - Allows opening the file without jumping to a specific line
-4. **Path type**: Always relative to project root (not absolute)
+   - Includes line number for cursor position (enables IDE navigation)
+   - Used for both single-line text selection and cursor-only (no selection) cases
+3. **Path type**: Always relative to project root (not absolute)
 
 ### Keyboard Shortcut
 
@@ -928,10 +918,11 @@ The core logic remains the same:
 
 Based on the VSCode repository structure, these could be ported:
 
-1. **R3BL Theme** - Port color theme to IntelliJ theme format (`.theme.json`)
-2. **R3BL Auto Insert Copyright** - Automatically add copyright headers to new files
-3. **R3BL Semantic Config** - Configuration management for semantic code tools
-4. **R3BL Plugin Pack** - Meta-plugin that bundles all R3BL plugins
+1. **R3BL Theme** - ✅ **IN DEVELOPMENT** - See `task/task_create_r3bl_theme_plugin.md` for detailed implementation plan
+   - Port color theme to IntelliJ theme format (`.theme.json`)
+   - Merge "Hard Hacker Darker" theme with user customizations
+   - Create as second plugin in the monorepo
+2. **R3BL Plugin Pack** - Meta-plugin that bundles all R3BL plugins
 
 ### Copy-Selection Plugin Enhancements
 

@@ -1,0 +1,33 @@
+<idea-plugin>
+    <id>com.r3bl.copy-selection-path</id>
+    <name>R3BL Copy Selection Path and Range</name>
+    <vendor email="info@r3bl.com" url="https://r3bl.com">R3BL</vendor>
+
+    <description><![CDATA[
+        Copy file path with selected line ranges in Claude Code compatible format.
+
+        <ul>
+            <li>No selection: path/to/file.kt</li>
+            <li>Single line: path/to/file.kt:42</li>
+            <li>Multi-line: path/to/file.kt#L42-45</li>
+        </ul>
+
+        Press Alt+O (or configured keybinding) to copy the current file path with line range.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- No extensions needed for basic action -->
+    </extensions>
+
+    <actions>
+        <action id="com.r3bl.CopySelectionPathAndRange"
+                class="com.r3bl.copyselection.CopySelectionPathAction"
+                text="Copy File Path with Selection Range"
+                description="Copy file path with selected line ranges in Claude Code format">
+            <keyboard-shortcut keymap="$default" first-keystroke="alt O"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

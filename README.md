@@ -57,6 +57,15 @@ Or manually with Gradle:
 ./gradlew buildPlugin
 ```
 
+### Verify Compatibility (Recommended Before Publishing)
+
+```bash
+# Verify all plugins against multiple IntelliJ versions
+./gradlew :plugins:r3bl-theme:runPluginVerifier :plugins:r3bl-copy-selection-path:runPluginVerifier
+```
+
+See the [Verifying Plugin Compatibility](#verifying-plugin-compatibility) section for details.
+
 ### Install Locally
 
 ```bash
@@ -70,16 +79,57 @@ Or manually:
 
 ## Development
 
+### Complete Development Workflow
+
+Here's the recommended workflow when making changes to a plugin:
+
+1. **Make your code changes**
+
+2. **Test locally**:
+   ```bash
+   ./gradlew :plugins:[plugin-name]:runIde
+   ```
+
+3. **Verify compatibility**:
+   ```bash
+   ./gradlew :plugins:[plugin-name]:runPluginVerifier
+   ```
+   Ensure all versions show "Compatible" status.
+
+4. **Bump version** in `plugins/[plugin-name]/build.gradle.kts`:
+   ```kotlin
+   version = "1.0.X"  // Increment from previous
+   ```
+
+5. **Build the plugin**:
+   ```bash
+   ./gradlew clean :plugins:[plugin-name]:buildPlugin
+   ```
+
+6. **Publish to marketplace**:
+   ```bash
+   ./gradlew :plugins:[plugin-name]:publishPlugin
+   ```
+
+7. **Wait for JetBrains review** (1-2 business days)
+
 ### Project Structure
 
 ```
 r3bl-intellij-plugins/
 ├── build.gradle.kts              # Root build configuration
 ├── settings.gradle.kts           # Multi-project setup
-├── gradle.properties             # Version properties
+├── gradle.properties             # Global properties (includes publish token & stdlib config)
 └── plugins/                      # Plugin modules
     ├── r3bl-copy-selection-path/
+    │   ├── build.gradle.kts      # Plugin-specific build config
+    │   └── src/main/
+    │       ├── kotlin/           # Plugin source code
+    │       └── resources/
+    │           ├── META-INF/plugin.xml  # Plugin descriptor
+    │           └── theme/        # Theme resources (for theme plugin)
     └── r3bl-theme/
+        └── (same structure)
 ```
 
 ### Adding a New Plugin
@@ -89,6 +139,7 @@ r3bl-intellij-plugins/
 3. Create `build.gradle.kts` for the plugin
 4. Create `src/main/resources/META-INF/plugin.xml`
 5. Implement plugin code in `src/main/kotlin/`
+6. Add `runPluginVerifier` configuration to `build.gradle.kts`
 
 ### Testing
 
@@ -103,6 +154,103 @@ r3bl-intellij-plugins/
 ```
 
 This launches IntelliJ IDEA with the plugin loaded for testing.
+
+### Verifying Plugin Compatibility
+
+Before publishing, verify compatibility with multiple IntelliJ versions:
+
+```bash
+# Verify a specific plugin
+./gradlew :plugins:r3bl-theme:runPluginVerifier
+./gradlew :plugins:r3bl-copy-selection-path:runPluginVerifier
+
+# Verify all plugins
+./gradlew :plugins:r3bl-theme:runPluginVerifier :plugins:r3bl-copy-selection-path:runPluginVerifier
+```
+
+The verifier checks compatibility against IntelliJ versions 2024.1 through 2025.2 (configured in each plugin's `build.gradle.kts`).
+
+**Important**: All plugins should pass verification with "Compatible" status before publishing to the marketplace.
+
+### Publishing to JetBrains Marketplace
+
+1. **Bump the version** in the plugin's `build.gradle.kts`:
+   ```kotlin
+   version = "1.0.2"  // Increment from previous version
+   ```
+
+2. **Rebuild the plugin**:
+   ```bash
+   ./gradlew clean :plugins:r3bl-theme:buildPlugin
+   ```
+
+3. **Verify compatibility** (see section above)
+
+4. **Publish to marketplace**:
+   ```bash
+   ./gradlew :plugins:r3bl-theme:publishPlugin
+   ```
+
+   The `intellijPublishToken` is configured in `gradle.properties`.
+
+5. **Wait for marketplace review**: JetBrains will review and approve within 1-2 business days.
+
+### Important Configuration Notes
+
+**Kotlin Standard Library**: Do NOT bundle the Kotlin stdlib with plugins. The IntelliJ Platform already provides it. This is configured in `gradle.properties`:
+
+```properties
+kotlin.stdlib.default.dependency = false
+```
+
+Without this setting, the bundled stdlib will trigger compatibility warnings for deprecated APIs. Always use the IDE-provided stdlib instead.
+
+## Troubleshooting
+
+### Compatibility Warnings from JetBrains Marketplace
+
+If you receive compatibility warnings about deprecated APIs or scheduled-for-removal APIs:
+
+1. **Check if Kotlin stdlib is bundled**:
+   ```bash
+   unzip -l plugins/[plugin-name]/build/distributions/[plugin-name]-*.zip | grep kotlin-stdlib
+   ```
+
+2. **If kotlin-stdlib appears**, verify `gradle.properties` has:
+   ```properties
+   kotlin.stdlib.default.dependency = false
+   ```
+
+3. **Clean and rebuild**:
+   ```bash
+   ./gradlew clean :plugins:[plugin-name]:buildPlugin
+   ```
+
+4. **Verify the fix worked** (stdlib should NOT appear):
+   ```bash
+   unzip -l plugins/[plugin-name]/build/distributions/[plugin-name]-*.zip | grep "\.jar"
+   ```
+
+5. **Run the plugin verifier** to confirm compatibility:
+   ```bash
+   ./gradlew :plugins:[plugin-name]:runPluginVerifier
+   ```
+
+### Updating Target IDE Versions
+
+To test against different IntelliJ versions, update the `runPluginVerifier` configuration in `plugins/[plugin-name]/build.gradle.kts`:
+
+```kotlin
+runPluginVerifier {
+    ideVersions.set(listOf(
+        "2024.1.7",
+        "2024.2.6",
+        "2024.3.7",
+        "2025.1.7",
+        "2025.2.4"
+    ))
+}
+```
 
 ## License
 

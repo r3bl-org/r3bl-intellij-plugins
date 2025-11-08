@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.r3bl"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -24,6 +24,16 @@ tasks {
 
     buildSearchableOptions {
         enabled = false
+    }
+
+    runPluginVerifier {
+        ideVersions.set(listOf(
+            "2024.1.7",
+            "2024.2.6",
+            "2024.3.7",
+            "2025.1.7",
+            "2025.2.4"
+        ))
     }
 
     // JetBrains Marketplace publication
